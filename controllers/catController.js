@@ -1,5 +1,6 @@
 let mysql = require('mysql');
 let dotenv = require('dotenv');
+let bcrypt = require('bcryptjs');
 
 let mysqlConnection = mysql.createConnection({
   host: process.env.CATS_HOST,
@@ -14,7 +15,6 @@ mysqlConnection.connect(function(err) {
     console.error('error connecting: ' + err.stack);
     return;
   }
-
   console.log('connected as id ' + mysqlConnection.threadId);
 });
 
@@ -22,12 +22,15 @@ let saveCat = (birthdate, breed, imageUrl, name, username, password, weight, cal
   let saveCatQuery = 'insert into cats (addedAt, breed, birthDate, externalId, imageUrl, lastSeenAt, name, password, username, weight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
   let addedAt = new Date();
   let lastSeenAt = new Date();
+  let hashedPassword = bcrypt.hashSync(password);
 
-  mysqlConnection.query(saveCatQuery, [addedAt, breed, new Date(birthdate), breed+name+username, imageUrl, lastSeenAt, name, password, username, weight], (err, result) => {
+  mysqlConnection.query(saveCatQuery, [addedAt, breed, new Date(birthdate), breed+name+username, imageUrl, lastSeenAt, name, hashedPassword, username, weight], (err, result) => {
     if(err){
       callback(err);
     }
-    callback(null, result);
+    else{
+      callback(null, result);
+    }
   });
   
 };
@@ -39,7 +42,6 @@ let usernameTaken = (username, callback) => {
       console.log('Error: ' + err);
       callback(err);
     }
-    console.log(result[0].count);
     if(result[0].count == 0){
       callback(null, false);
     }
@@ -49,6 +51,21 @@ let usernameTaken = (username, callback) => {
   });
 };
 
+let updateSeenAtDate = (username, callback) => {
+  let seenAtDate = new Date();
+  let updateQuery = 'update cats set lastSeenAt = ? where username = ?';
+
+  mysqlConnection.query(updateQuery, [seenAtDate, username], (err, result) => {
+    if(err){
+      callback(err);
+    }
+    else{
+      callback(null, result);
+    }
+  });
+};
+
 module.exports.usernameTaken = usernameTaken;
 module.exports.saveCat = saveCat;
+module.exports.updateSeenAtDate = updateSeenAtDate;
 

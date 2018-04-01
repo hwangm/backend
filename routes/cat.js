@@ -31,13 +31,6 @@ var catController = require('../controllers/catController');
     - password < 8 characters
  */
 router.put('/register', (req, res, next) => {
-  catController.usernameTaken(req.body.username, (err, isTaken) => {
-    if(err || isTaken){
-      return res.status(400).send({
-        'Error': 'Username is taken already. Please choose a different username and try again.'
-      });
-    }
-  });
   if(!req.body.name){
     return res.status(400).send({
       'Error': 'Cat name not specified in the request body. Please ensure request body includes a name parameter.'
@@ -48,16 +41,24 @@ router.put('/register', (req, res, next) => {
       'Error': 'Password must be greater than 7 characters. Please try again.'
     });
   }
-  catController.saveCat(req.body.birthdate, req.body.breed, req.body.imageUrl, req.body.name, req.body.username, req.body.password, req.body.weight, (err, result) => {
-    if(err){
-      return res.status(500).send({
-        'Error': 'An error occurred when trying to save the cat information. Please try again later.'
+  catController.usernameTaken(req.body.username, (err, isTaken) => {
+    if(err || isTaken){
+      return res.status(400).send({
+        'Error': 'Username is taken already. Please choose a different username and try again.'
       });
     }
-    else{
-      return res.sendStatus(200);
-    }
+    catController.saveCat(req.body.birthdate, req.body.breed, req.body.imageUrl, req.body.name, req.body.username, req.body.password, req.body.weight, (err, result) => {
+      if(err){
+        return res.status(500).send({
+          'Error': 'An error occurred when trying to save the cat information. Please try again later.'
+        });
+      }
+      else{
+        return res.sendStatus(200);
+      }
+    });
   });
+  
 
 });
 
@@ -76,7 +77,23 @@ router.put('/register', (req, res, next) => {
  */
 
 router.post('/login', (req, res, next) => {
-
+  catController.usernameTaken(req.body.username, (err, isTaken) => {
+    if(err || !isTaken){
+      return res.status(400).send({
+        'Error': 'Username not found. Please try again with a valid username.'
+      });
+    }
+    else{
+      catController.updateSeenAtDate(req.body.username, (err, result) => {
+        if(err){
+          return res.status(500).send({
+            'Error': 'Something went wrong when updating the seen at date. Please try again later.'
+          });
+        }
+        
+      });
+    }
+  });
 });
 
 module.exports = router;
