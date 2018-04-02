@@ -1,5 +1,5 @@
 let mysql = require('mysql');
-let dotenv = require('dotenv');
+let dotenv = require('dotenv').config();
 let bcrypt = require('bcryptjs');
 
 let mysqlConnection = mysql.createConnection({
@@ -26,10 +26,10 @@ let saveCat = (birthdate, breed, imageUrl, name, username, password, weight, cal
 
   mysqlConnection.query(saveCatQuery, [addedAt, breed, new Date(birthdate), breed+name+username, imageUrl, lastSeenAt, name, hashedPassword, username, weight], (err, result) => {
     if(err){
-      callback(err);
+      return callback(err);
     }
     else{
-      callback(null, result);
+      return callback(null, result);
     }
   });
   
@@ -40,14 +40,28 @@ let usernameTaken = (username, callback) => {
   mysqlConnection.query(usernameQuery, username, (err, result) => {
     if(err){
       console.log('Error: ' + err);
-      callback(err);
+      return callback(err);
     }
     if(result[0].count == 0){
-      callback(null, false);
+      return callback(null, false);
     }
     else {
-      callback(null, true);
+      return callback(null, true);
     }
+  });
+};
+
+let isValidPassword = (username, password, callback) => {
+  let passwordQuery = 'select password from cats where username=?';
+  mysqlConnection.query(passwordQuery, username, (err, result) => {
+    bcrypt.compare(password, result[0].password, (err, isMatch) => {
+      if(isMatch){
+        return callback(null, true);
+      }
+      else{
+        return callback(null, false);
+      }
+    });
   });
 };
 
@@ -57,15 +71,21 @@ let updateSeenAtDate = (username, callback) => {
 
   mysqlConnection.query(updateQuery, [seenAtDate, username], (err, result) => {
     if(err){
-      callback(err);
+      return callback(err);
     }
     else{
-      callback(null, result);
+      return callback(null, result);
     }
   });
+};
+
+let getCats = (externalId, name, username, callback) => {
+
 };
 
 module.exports.usernameTaken = usernameTaken;
 module.exports.saveCat = saveCat;
 module.exports.updateSeenAtDate = updateSeenAtDate;
+module.exports.isValidPassword = isValidPassword;
+module.exports.getCats = getCats;
 

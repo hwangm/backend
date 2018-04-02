@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+let catController = require('../controllers/catController');
+let auth = require('../controllers/auth');
 
 /**
  * @GET cats
@@ -16,7 +18,30 @@ var router = express.Router();
  */
 
 router.get('/', (req, res, next) => {
-  
+  if(!req.headers['authToken']){
+    return res.status(401).send({
+      'Error': 'No token in the headers'
+    });
+  }
+  auth.isValidToken(req.headers.authToken, (err, isAuthorized) => {
+    if(err || !isAuthorized){
+      return res.status(401).send({
+        'Error': 'Invalid token.'
+      });
+    }
+    let externalId = req.body.externalId ? req.body.externalId : null;
+    let name = req.body.name ? req.body.name : null;
+    let username = req.body.username ? req.body.username : null;
+    console.log('extId: '+externalId+', name: '+name+', username: '+username);
+    catController.getCats(externalId, name, username, (err, result) => {
+      if(err) {
+        return res.status(500).send({
+          'Error': 'Unable to get cats.'
+        });
+      }
+      
+    });
+  });
 });
 
  /**

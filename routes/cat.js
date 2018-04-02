@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var catController = require('../controllers/catController');
+var catController = require('../controllers/catController')
+var auth = require('../controllers/auth');
 
 /**
  * @PUT cat/register
@@ -84,13 +85,31 @@ router.post('/login', (req, res, next) => {
       });
     }
     else{
-      catController.updateSeenAtDate(req.body.username, (err, result) => {
-        if(err){
-          return res.status(500).send({
-            'Error': 'Something went wrong when updating the seen at date. Please try again later.'
+      catController.isValidPassword(req.body.username, req.body.password, (err, isValidPassword) => {
+        if(err || !isValidPassword){
+          return res.status(400).send({
+            'Error': 'Invalid password.'
           });
         }
-        
+        else{
+          catController.updateSeenAtDate(req.body.username, (err, result) => {
+            if(err){
+              return res.status(500).send({
+                'Error': 'Something went wrong when updating the seen at date. Please try again later.'
+              });
+            }
+          });
+          auth.authUser(req.body.username, (err, token) => {
+            if(err){
+              return res.status(500).send({
+                'Error': 'Could not authenticate user.'
+              });
+            }
+            else{
+              return res.status(200).json(token);
+            }
+          });
+        }
       });
     }
   });
