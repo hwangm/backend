@@ -41,10 +41,8 @@ router.get('/', (req, res, next) => {
     let externalId = req.query.externalId ? req.query.externalId : null;
     let name = req.query.name ? req.query.name : null;
     let username = req.query.username ? req.query.username : null;
-    console.log('extId: '+externalId+', name: '+name+', username: '+username);
     catController.getCats(externalId, name, username, (err, result) => {
       if(err) {
-        console.log(err);
         return res.status(500).send({
           'Error': 'Unable to get cats.'
         });

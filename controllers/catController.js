@@ -81,7 +81,7 @@ let updateSeenAtDate = (username, callback) => {
 
 let getCats = (externalId, name, username, callback) => {
   let criteriaNames = ['externalId', 'name', 'username'];
-  
+
   let whereClause = [externalId, name, username].reduce((p, c, index) => {
     if(c){
       if(p != ''){
@@ -94,9 +94,7 @@ let getCats = (externalId, name, username, callback) => {
     else return p;
   }, '');
   let sortByClause = ' order by lastSeenAt';
-  console.log(whereClause);
   let selectCatQuery = "select birthdate, breed, username, externalId, imageUrl, name from cats" + whereClause + sortByClause;
-  console.log(selectCatQuery);
   mysqlConnection.query(selectCatQuery, (err, result) => {
     if(err){
       return callback(err);

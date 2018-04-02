@@ -1,6 +1,5 @@
 let dotenv = require('dotenv').config();
 let catController = require('./catController');
-let bcrypt = require('bcryptjs');
 let jwt = require('jsonwebtoken');
 
 let authUser = (username, callback) => {
