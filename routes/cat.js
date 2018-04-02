@@ -39,7 +39,7 @@ router.put('/register', (req, res, next) => {
   }
   if(req.body.password.length < 8){
     return res.status(400).send({
-      'Error': 'Password must be greater than 7 characters. Please try again.'
+      'Error': 'Password must be 8 or more characters long. Please try again.'
     });
   }
   catController.usernameTaken(req.body.username, (err, isTaken) => {
