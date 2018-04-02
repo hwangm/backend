@@ -80,7 +80,47 @@ let updateSeenAtDate = (username, callback) => {
 };
 
 let getCats = (externalId, name, username, callback) => {
+  let criteriaNames = ['externalId', 'name', 'username'];
+  
+  let whereClause = [externalId, name, username].reduce((p, c, index) => {
+    if(c){
+      if(p != ''){
+        return p + ' and ' + criteriaNames[index] + '=' + mysql.escape(c);
+      }
+      else{
+        return p + ' where ' + criteriaNames[index] + '=' + mysql.escape(c);
+      }
+    }
+    else return p;
+  }, '');
+  let sortByClause = ' order by lastSeenAt';
+  console.log(whereClause);
+  let selectCatQuery = "select birthdate, breed, username, externalId, imageUrl, name from cats" + whereClause + sortByClause;
+  console.log(selectCatQuery);
+  mysqlConnection.query(selectCatQuery, (err, result) => {
+    if(err){
+      return callback(err);
+    }
+    return callback(null, result);
+  });
+};
 
+let getRandomCat = (callback) => {
+  let idListQuery = 'select id from cats';
+  mysqlConnection.query(idListQuery, (err, idList) => {
+    if(err){
+      return callback(err);
+    }
+    let catId = idList[Math.floor(Math.random() * idList.length)].id;
+    let selectRandomCatQuery = 'select imageUrl, name, breed from cats where id=?';
+    mysqlConnection.query(selectRandomCatQuery, catId, (err, catInfo) => {
+      if(err){
+        return callback(err);
+      }
+      return callback(null, catInfo);
+    });
+  });
+  
 };
 
 module.exports.usernameTaken = usernameTaken;
@@ -88,4 +128,5 @@ module.exports.saveCat = saveCat;
 module.exports.updateSeenAtDate = updateSeenAtDate;
 module.exports.isValidPassword = isValidPassword;
 module.exports.getCats = getCats;
+module.exports.getRandomCat = getRandomCat;
 

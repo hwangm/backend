@@ -26,3 +26,4 @@ let isValidToken = (token, callback) => {
 }
 
 module.exports.authUser = authUser;
+module.exports.isValidToken = isValidToken;

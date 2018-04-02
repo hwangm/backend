@@ -18,28 +18,38 @@ let auth = require('../controllers/auth');
  */
 
 router.get('/', (req, res, next) => {
-  if(!req.headers['authToken']){
+  if(!req.headers['authtoken']){
     return res.status(401).send({
       'Error': 'No token in the headers'
     });
   }
-  auth.isValidToken(req.headers.authToken, (err, isAuthorized) => {
+  auth.isValidToken(req.headers.authtoken, (err, isAuthorized) => {
     if(err || !isAuthorized){
       return res.status(401).send({
         'Error': 'Invalid token.'
       });
     }
-    let externalId = req.body.externalId ? req.body.externalId : null;
-    let name = req.body.name ? req.body.name : null;
-    let username = req.body.username ? req.body.username : null;
+    let allowedCriteria = ['externalId', 'name', 'username'];
+    for(let criteria in req.query){
+      if(allowedCriteria.indexOf(criteria) == -1){
+        return res.status(400).send({
+          'Error': 'Invalid search criteria: '+criteria
+        });
+      }
+    }
+    // I am assuming the optional search parameters will come in query string
+    let externalId = req.query.externalId ? req.query.externalId : null;
+    let name = req.query.name ? req.query.name : null;
+    let username = req.query.username ? req.query.username : null;
     console.log('extId: '+externalId+', name: '+name+', username: '+username);
     catController.getCats(externalId, name, username, (err, result) => {
       if(err) {
+        console.log(err);
         return res.status(500).send({
           'Error': 'Unable to get cats.'
         });
       }
-      
+      return res.status(200).json(result);
     });
   });
 });
@@ -50,7 +60,26 @@ router.get('/', (req, res, next) => {
     Returns: imageUrl: String, name: String, and breed: String for a random cat
   */
 router.get('/random', (req, res, next) => {
-
+  if(!req.headers['authtoken']){
+    return res.status(401).send({
+      'Error': 'No token in the headers'
+    });
+  }
+  auth.isValidToken(req.headers.authtoken, (err, isAuthorized) => {
+    if(err || !isAuthorized){
+      return res.status(401).send({
+        'Error': 'Invalid token.'
+      });
+    }
+    catController.getRandomCat((err, catInfo) => {
+      if(err) {
+        return res.status(500).send({
+          'Error': 'Cannot return random cat.'
+        });
+      }
+      return res.status(200).json(catInfo);
+    });
+  });
 });
 
 
