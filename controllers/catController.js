@@ -115,7 +115,7 @@ let getRandomCat = (callback) => {
       if(err){
         return callback(err);
       }
-      return callback(null, catInfo);
+      return callback(null, catInfo[0]);
     });
   });
   
