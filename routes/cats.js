@@ -58,25 +58,13 @@ router.get('/', (req, res, next) => {
     Returns: imageUrl: String, name: String, and breed: String for a random cat
   */
 router.get('/random', (req, res, next) => {
-  if(!req.headers['authtoken']){
-    return res.status(401).send({
-      'Error': 'No token in the headers'
-    });
-  }
-  auth.isValidToken(req.headers.authtoken, (err, isAuthorized) => {
-    if(err || !isAuthorized){
-      return res.status(401).send({
-        'Error': 'Invalid token.'
+  catController.getRandomCatFromAPI((err, catInfo) => {
+    if(err) {
+      return res.status(500).send({
+        'Error': 'Cannot return random cat.'
       });
     }
-    catController.getRandomCat((err, catInfo) => {
-      if(err) {
-        return res.status(500).send({
-          'Error': 'Cannot return random cat.'
-        });
-      }
-      return res.status(200).json(catInfo);
-    });
+    return res.status(200).json(catInfo);
   });
 });
 

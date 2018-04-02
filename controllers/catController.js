@@ -1,6 +1,7 @@
 let mysql = require('mysql');
 let dotenv = require('dotenv').config();
 let bcrypt = require('bcryptjs');
+let cat = require('cats-js');
 
 let mysqlConnection = mysql.createConnection({
   host: process.env.CATS_HOST,
@@ -103,6 +104,18 @@ let getCats = (externalId, name, username, callback) => {
   });
 };
 
+let getRandomCatFromAPI = (callback) => {
+  let c = new cat();
+
+  c.get()
+   .then((cat) => {
+     return callback(null, cat.images.image);
+   })
+   .catch((err) => {
+     return callback(err);
+   });
+};
+
 let getRandomCat = (callback) => {
   let idListQuery = 'select id from cats';
   mysqlConnection.query(idListQuery, (err, idList) => {
@@ -127,4 +140,5 @@ module.exports.updateSeenAtDate = updateSeenAtDate;
 module.exports.isValidPassword = isValidPassword;
 module.exports.getCats = getCats;
 module.exports.getRandomCat = getRandomCat;
+module.exports.getRandomCatFromAPI = getRandomCatFromAPI;
 
