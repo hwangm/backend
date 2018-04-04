@@ -116,29 +116,10 @@ let getRandomCatFromAPI = (callback) => {
    });
 };
 
-let getRandomCat = (callback) => {
-  let idListQuery = 'select id from cats';
-  mysqlConnection.query(idListQuery, (err, idList) => {
-    if(err){
-      return callback(err);
-    }
-    let catId = idList[Math.floor(Math.random() * idList.length)].id;
-    let selectRandomCatQuery = 'select imageUrl, name, breed from cats where id=?';
-    mysqlConnection.query(selectRandomCatQuery, catId, (err, catInfo) => {
-      if(err){
-        return callback(err);
-      }
-      return callback(null, catInfo[0]);
-    });
-  });
-  
-};
-
 module.exports.usernameTaken = usernameTaken;
 module.exports.saveCat = saveCat;
 module.exports.updateSeenAtDate = updateSeenAtDate;
 module.exports.isValidPassword = isValidPassword;
 module.exports.getCats = getCats;
-module.exports.getRandomCat = getRandomCat;
 module.exports.getRandomCatFromAPI = getRandomCatFromAPI;
 

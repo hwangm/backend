@@ -32,7 +32,7 @@ var auth = require('../controllers/auth');
     - password < 8 characters
  */
 router.put('/register', (req, res, next) => {
-  if(!req.body.name){
+  if(!req.body.name || req.body.name == ''){
     return res.status(400).send({
       'Error': 'Cat name not specified in the request body. Please ensure request body includes a name parameter.'
     });
